@@ -1,0 +1,300 @@
+# Docker Multi-Node Setup for Netchain Testing
+# Provides distributed testing environment with 4 validator nodes
+
+version: '3.8'
+
+services:
+  # Node 1 - Alice (Bootnode)
+  netchain-alice:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: netchain-alice
+    ports:
+      - "9944:9944"   # WebSocket RPC
+      - "9933:9933"   # HTTP RPC
+      - "30333:30333" # P2P
+    volumes:
+      - alice-data:/data
+      - ../target/release:/app
+      - ./chain-specs:/chain-specs
+    environment:
+      - NODE_NAME=alice
+      - VALIDATOR=true
+      - CHAIN_SPEC=netchain-local
+      - LOG_LEVEL=info
+    command: >
+      /app/netchain-node
+      --alice
+      --validator
+      --base-path /data
+      --chain /chain-specs/netchain-local.json
+      --port 30333
+      --ws-port 9944
+      --rpc-port 9933
+      --rpc-methods=Unsafe
+      --rpc-cors=all
+      --ws-external
+      --rpc-external
+      --log info
+      --node-key-file /data/alice.key
+      --telemetry-url "wss://telemetry.polkadot.io/submit/ 0"
+    networks:
+      - netchain-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9933/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Node 2 - Bob
+  netchain-bob:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: netchain-bob
+    ports:
+      - "9945:9944"
+      - "9934:9933"
+      - "30334:30333"
+    volumes:
+      - bob-data:/data
+      - ../target/release:/app
+      - ./chain-specs:/chain-specs
+    environment:
+      - NODE_NAME=bob
+      - VALIDATOR=true
+      - CHAIN_SPEC=netchain-local
+      - LOG_LEVEL=info
+    command: >
+      /app/netchain-node
+      --bob
+      --validator
+      --base-path /data
+      --chain /chain-specs/netchain-local.json
+      --port 30333
+      --ws-port 9944
+      --rpc-port 9933
+      --rpc-methods=Unsafe
+      --rpc-cors=all
+      --ws-external
+      --rpc-external
+      --log info
+      --bootnodes /dns/netchain-alice/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
+      --telemetry-url "wss://telemetry.polkadot.io/submit/ 0"
+    networks:
+      - netchain-network
+    depends_on:
+      netchain-alice:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9933/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Node 3 - Charlie  
+  netchain-charlie:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: netchain-charlie
+    ports:
+      - "9946:9944"
+      - "9935:9933"
+      - "30335:30333"
+    volumes:
+      - charlie-data:/data
+      - ../target/release:/app
+      - ./chain-specs:/chain-specs
+    environment:
+      - NODE_NAME=charlie
+      - VALIDATOR=true
+      - CHAIN_SPEC=netchain-local
+      - LOG_LEVEL=info
+    command: >
+      /app/netchain-node
+      --charlie
+      --validator
+      --base-path /data
+      --chain /chain-specs/netchain-local.json
+      --port 30333
+      --ws-port 9944
+      --rpc-port 9933
+      --rpc-methods=Unsafe
+      --rpc-cors=all
+      --ws-external
+      --rpc-external
+      --log info
+      --bootnodes /dns/netchain-alice/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
+      --telemetry-url "wss://telemetry.polkadot.io/submit/ 0"
+    networks:
+      - netchain-network
+    depends_on:
+      netchain-alice:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9933/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Node 4 - Dave
+  netchain-dave:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: netchain-dave
+    ports:
+      - "9947:9944"
+      - "9936:9933"
+      - "30336:30333"
+    volumes:
+      - dave-data:/data
+      - ../target/release:/app
+      - ./chain-specs:/chain-specs
+    environment:
+      - NODE_NAME=dave
+      - VALIDATOR=true
+      - CHAIN_SPEC=netchain-local
+      - LOG_LEVEL=info
+    command: >
+      /app/netchain-node
+      --dave
+      --validator
+      --base-path /data
+      --chain /chain-specs/netchain-local.json
+      --port 30333
+      --ws-port 9944
+      --rpc-port 9933
+      --rpc-methods=Unsafe
+      --rpc-cors=all
+      --ws-external
+      --rpc-external
+      --log info
+      --bootnodes /dns/netchain-alice/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
+      --telemetry-url "wss://telemetry.polkadot.io/submit/ 0"
+    networks:
+      - netchain-network
+    depends_on:
+      netchain-alice:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9933/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Test Runner Service
+  netchain-tests:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.tests
+    container_name: netchain-tests
+    volumes:
+      - ../tests:/tests
+      - ../target/release:/app
+      - test-results:/results
+    environment:
+      - ALICE_NODE=http://netchain-alice:9933
+      - BOB_NODE=http://netchain-bob:9933
+      - CHARLIE_NODE=http://netchain-charlie:9933
+      - DAVE_NODE=http://netchain-dave:9933
+      - RUST_LOG=info
+    networks:
+      - netchain-network
+    depends_on:
+      netchain-alice:
+        condition: service_healthy
+      netchain-bob:
+        condition: service_healthy
+      netchain-charlie:
+        condition: service_healthy
+      netchain-dave:
+        condition: service_healthy
+    profiles:
+      - testing
+
+  # Monitoring Service
+  netchain-monitor:
+    image: prom/prometheus:latest
+    container_name: netchain-monitor
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - netchain-network
+    profiles:
+      - monitoring
+
+  # Grafana for Visualization
+  netchain-grafana:
+    image: grafana/grafana:latest
+    container_name: netchain-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=netchain
+      - GF_USERS_ALLOW_SIGN_UP=false
+    networks:
+      - netchain-network
+    depends_on:
+      - netchain-monitor
+    profiles:
+      - monitoring
+
+  # Load Balancer for Testing
+  netchain-loadbalancer:
+    image: nginx:alpine
+    container_name: netchain-loadbalancer
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - netchain-network
+    depends_on:
+      - netchain-alice
+      - netchain-bob
+      - netchain-charlie
+      - netchain-dave
+    profiles:
+      - loadtest
+
+networks:
+  netchain-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  alice-data:
+    driver: local
+  bob-data:
+    driver: local
+  charlie-data:
+    driver: local
+  dave-data:
+    driver: local
+  test-results:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local

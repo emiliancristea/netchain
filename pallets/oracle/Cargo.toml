@@ -1,0 +1,79 @@
+[package]
+name = "pallet-oracle"
+version = "0.1.0"
+description = "Native oracle pallet for Netchain off-chain data integration"
+authors = ["Netchain Core Team"]
+homepage = "https://github.com/bunkercorporation/netchain"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+repository = "https://github.com/bunkercorporation/netchain"
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+
+[dependencies]
+# Substrate dependencies
+frame-benchmarking = { optional = true, workspace = true }
+frame-support = { workspace = true }
+frame-system = { workspace = true }
+pallet-balances = { workspace = true }
+pallet-timestamp = { workspace = true }
+sp-std = { workspace = true }
+sp-runtime = { workspace = true }
+sp-core = { workspace = true }
+sp-io = { workspace = true }
+
+# Codec
+codec = { package = "parity-scale-codec", version = "3.6.1", default-features = false, features = [
+	"derive",
+] }
+scale-info = { version = "2.10.0", default-features = false, features = ["derive"] }
+
+# Oracle-specific dependencies
+serde = { version = "1.0", default-features = false, optional = true, features = ["derive"] }
+serde_json = { version = "1.0", default-features = false, optional = true, features = ["alloc"] }
+
+# HTTP requests (for std only)
+reqwest = { version = "0.12", default-features = false, optional = true, features = ["json"] }
+tokio = { version = "1.0", default-features = false, optional = true, features = ["rt-multi-thread"] }
+
+[dev-dependencies]
+sp-core = { workspace = true, features = ["std"] }
+sp-io = { workspace = true, features = ["std"] }
+sp-runtime = { workspace = true, features = ["std"] }
+
+[features]
+default = ["std"]
+std = [
+	"frame-benchmarking?/std",
+	"frame-support/std",
+	"frame-system/std",
+	"pallet-balances/std",
+	"pallet-timestamp/std",
+	"sp-std/std",
+	"sp-runtime/std",
+	"sp-core/std",
+	"sp-io/std",
+	"codec/std",
+	"scale-info/std",
+	"serde",
+	"serde_json",
+	"reqwest",
+	"tokio",
+]
+runtime-benchmarks = [
+	"frame-benchmarking/runtime-benchmarks",
+	"frame-support/runtime-benchmarks",
+	"frame-system/runtime-benchmarks",
+	"pallet-balances/runtime-benchmarks",
+	"pallet-timestamp/runtime-benchmarks",
+	"sp-runtime/runtime-benchmarks",
+]
+try-runtime = [
+	"frame-support/try-runtime",
+	"frame-system/try-runtime",
+	"pallet-balances/try-runtime",
+	"pallet-timestamp/try-runtime",
+	"sp-runtime/try-runtime",
+]

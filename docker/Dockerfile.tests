@@ -1,0 +1,38 @@
+# Test runner image for Netchain
+FROM rust:1.75-slim
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    build-essential \
+    git \
+    clang \
+    curl \
+    libssl-dev \
+    llvm \
+    libudev-dev \
+    protobuf-compiler \
+    pkg-config \
+    jq \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install testing tools
+RUN cargo install cargo-nextest
+RUN cargo install subxt-cli
+
+# Set working directory
+WORKDIR /tests
+
+# Copy test files
+COPY tests/ .
+COPY Cargo.toml Cargo.lock ./
+
+# Install test dependencies
+RUN cargo fetch
+
+# Test runner script
+COPY docker/run-tests.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/run-tests.sh
+
+# Default command
+CMD ["/usr/local/bin/run-tests.sh"]

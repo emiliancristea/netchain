@@ -1,0 +1,154 @@
+# Rust
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Substrate
+/chain-specs/
+chain-data/
+/db/
+keystore/
+
+# Logs
+*.log
+logs/
+
+# Testing
+/fuzz/artifacts/
+/fuzz/corpus/
+/test-results/
+coverage/
+*.profraw
+
+# Docker
+.docker/
+
+# Node.js (for tooling)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python (for tooling)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Documentation
+/target/doc/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Build outputs
+*.wasm
+*.wat
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Package files
+*.tar.gz
+*.zip
+
+# Benchmark results
+/target/criterion/
+
+# Security
+private_keys/
+*.pem
+*.key
+
+# Local development
+local-*
+dev-*
+temp-*
+
+# Compiled binaries
+netchain-node
+netchain-benchmarks
+
+# Chain data
+alice/
+bob/
+charlie/
+dave/
+
+# macOS
+.AppleDouble
+.LSOverride
+
+# Windows
+*.exe
+*.msi
+*.msm
+*.msp
+
+# Linux
+*.AppImage
+
+# JetBrains
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+Session.vim
+.netrwhist
+
+# Tags
+tags
+.tags
+tags.lock
+tags.temp
